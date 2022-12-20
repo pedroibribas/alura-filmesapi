@@ -1,33 +1,27 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FilmesAPI.Models;
+// A classe DTO apresenta somente informações que interessam ao cliente.
+// Dessa forma, os controladores parametrizam os DTOS para proibir que
+// o cliente envie dados desnecessários que podem comprometer os dados
+// da base de dados.
 
-// CMT: modelo é a representação do mundo real
+namespace FilmesAPI.Data.Dtos;
 
-// CMT: Data Annotations são atributos de validação usados
-// no model para criar restrições à requisição enviada pelo usuário.
-// Caso ocorra erro na validação, uma resposta JSON
-// é retornada com status 400 (Bad Request) e a mensagem de erro.
-
-public class Filme
+public class CreateFilmeDto
 {
-    // # Id
-    [Key] // indicação de Primary Key para o banco de dados
-    [Required]
-    public int Id { get; set; }
-
     // # Título
     // Valor não pode ser nulo ou vazio
     [Required(ErrorMessage = "Título do filme é obrigatório")]
     public string Titulo { get; set; }
-    
+
     // # Gênero
     // Valor não pode ser nulo ou vazio
     [Required]
     // Valor deve possuir até 50 caracteres
-    [MaxLength(50, ErrorMessage = "Gênero deve conter até 50 caracteres")]
+    [StringLength(50, ErrorMessage = "Gênero deve conter até 50 caracteres")]
+    // CMT: StringLength é melhor que MaxLength, sem alocar memória no banco
     public string Genero { get; set; }
-    
+
     // # Duração
     // Valor não pode ser nulo ou vazio
     [Required(ErrorMessage = "Duração do filme é obrigatório")]

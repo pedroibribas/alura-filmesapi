@@ -1,4 +1,7 @@
-﻿using FilmesAPI.Models;
+﻿using AutoMapper;
+using FilmesAPI.Data;
+using FilmesAPI.Data.Dtos;
+using FilmesAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FilmesAPI.Controllers;
@@ -7,16 +10,34 @@ namespace FilmesAPI.Controllers;
 [Route("[controller]")] // CMT: a rota é o nome precedente ao sufixo Controller
 public class FilmeController : ControllerBase // CMT: extende ControllerBase
 {
-    // CMT: inicializar lista para guardar dados in-memory
-    private static List<Filme> filmes = new List<Filme>();
-    private static int id = 0;
+    // Inicializar instância do contexto
+    private FilmeContext _context;    
+    // Inicializar instância do AutoMapper
+    private IMapper _mapper;
 
-    // # Adicionar recurso na DB
-    [HttpPost]
-    public IActionResult AdicionaFilme([FromBody] Filme filme)
+    // Implementar contexto e mapper via DI
+    public FilmeController(FilmeContext context, IMapper mapper)
     {
-        filme.Id = id++;
-        filmes.Add(filme);
+        _context = context;
+        _mapper = mapper;
+    }
+
+    // CMT: inicializar lista para guardar dados in-memory
+    //private static List<Filme> filmes = new List<Filme>();
+    //private static int id = 0;
+
+    [HttpPost]
+    public IActionResult AdicionaFilme(
+        [FromBody] CreateFilmeDto filmeDto
+        )
+    {
+        //filme.Id = id++;
+        //filmes.Add(filme);
+
+        Filme filme = _mapper.Map<Filme>( filmeDto );
+
+        _context.Filmes.Add(filme);
+        _context.SaveChanges();
 
         // CMT: para um Post, a boa prática é retornar o
         // elemento criado e a localização de como recuperá-lo depois.
@@ -29,7 +50,6 @@ public class FilmeController : ControllerBase // CMT: extende ControllerBase
             filme);
     }
 
-    // # Recuperar/ler recursos da DB
     [HttpGet]
     public IEnumerable<Filme> RecuperaFilmes(
         [FromQuery] int skip = 0,
@@ -50,7 +70,7 @@ public class FilmeController : ControllerBase // CMT: extende ControllerBase
         // Skip() evita o nro de elementos para iniciar a consulta, e o Take() 
         // puxa um nro de elementos fixado
 
-        return filmes.Skip(skip).Take(take);
+        return _context.Filmes.Skip(skip).Take(take);
     }
 
     [HttpGet("{id}")]
@@ -63,7 +83,7 @@ public class FilmeController : ControllerBase // CMT: extende ControllerBase
         // é filtrar os dados obtidos. As tecnologias do .NET relativas
         // às queries pertecem ao LINQ
 
-        var filme = filmes.FirstOrDefault(filme => filme.Id == id);
+        var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
 
         // se filme não for encontrado, retornar 404; senão, retornar 200 e o filme
         if (filme == null ) return NotFound();
