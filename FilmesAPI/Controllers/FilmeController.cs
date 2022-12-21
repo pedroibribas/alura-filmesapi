@@ -2,6 +2,7 @@
 using FilmesAPI.Data;
 using FilmesAPI.Data.Dtos;
 using FilmesAPI.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FilmesAPI.Controllers;
@@ -51,7 +52,7 @@ public class FilmeController : ControllerBase // CMT: extende ControllerBase
     }
 
     [HttpGet]
-    public IEnumerable<Filme> RecuperaFilmes(
+    public IEnumerable<ReadFilmeDto> RecuperaFilmes(
         [FromQuery] int skip = 0,
         [FromQuery] int take = 2
         )
@@ -61,7 +62,8 @@ public class FilmeController : ControllerBase // CMT: extende ControllerBase
         // ter de refatorar o código caso o tipo de Filmes mude
 
         // CMT: [FromQuery] é o dado enviado na URL após um "?", cuja
-        // função é definir critérios para busca
+        // função é definir critérios para busca.
+        // As tecnologias do .NET relativas às queries pertecem ao LINQ
 
         // CMT: a Paginação é a técnica de filtrar os
         // dados obtidos da base de dados. Ela serve para reduzir
@@ -70,7 +72,11 @@ public class FilmeController : ControllerBase // CMT: extende ControllerBase
         // Skip() evita o nro de elementos para iniciar a consulta, e o Take() 
         // puxa um nro de elementos fixado
 
-        return _context.Filmes.Skip(skip).Take(take);
+        // CMT: sobre mapeamento da entidade, ver HttpGet("{id}")
+
+        var filmes = _context.Filmes.Skip(skip).Take(take);
+
+        return _mapper.Map<List<ReadFilmeDto>>(filmes);
     }
 
     [HttpGet("{id}")]
@@ -79,14 +85,90 @@ public class FilmeController : ControllerBase // CMT: extende ControllerBase
         )
     {
         // CMT: "{id}" é o dado enviado na URL após um "/",
-        // isto é, é o parâmetro/query da requisição, cuja finalidade
-        // é filtrar os dados obtidos. As tecnologias do .NET relativas
-        // às queries pertecem ao LINQ
+        // isto é, é o parâmetro da requisição
+
+        // CMT: validar se filme existe; se filme não for encontrado,
+        // retornar 404
 
         var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
-
-        // se filme não for encontrado, retornar 404; senão, retornar 200 e o filme
         if (filme == null ) return NotFound();
-        return Ok(filme);
+
+        // CMT: mapear a entidade para o DTO, porque interessa ao cliente
+        // retornar o DTO
+
+        var filmeDto = _mapper.Map<ReadFilmeDto>(filme);
+
+        // CMT: retornar 200 com os dados da consulta
+
+        return Ok(filmeDto);
+    }
+
+    [HttpPut("{id}")]
+    public IActionResult AtualizaFilme(
+        int id,
+        [FromBody] UpdateFilmeDto filmeDto
+        )
+    {
+        var filme = _context.Filmes.FirstOrDefault(
+            filme => filme.Id == id);
+
+        if (filme == null) return NotFound();
+
+        _mapper.Map(filmeDto, filme);
+        _context.SaveChanges();
+
+        // CMT: o retorno de um PUT deve ser 204 - No Content
+
+        return NoContent();
+    }
+
+    [HttpPatch("{id}")]
+    public IActionResult AtualizaFilmeParcial(
+        int id,
+        JsonPatchDocument<UpdateFilmeDto> patch
+        )
+    {
+        // CMT: para processar operações Patch, é necessário
+        // instalar o Microsoft.AspNetCore.MVC.NewtonsoftJson
+
+        // CMT: o corpo da requisição deve seguir o exemplo:
+        // [ { "op": "replace", "path": "/duracao", "value": "200" } ]
+
+        var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
+        if (filme == null) return NotFound();
+
+        // CMT: para realizar o patch, é necessário mapear uma versão
+        // dto da entidade que será modificada pelo patch
+
+        var filmeParaAtualizar = _mapper.Map<UpdateFilmeDto>(filme);
+
+        patch.ApplyTo(filmeParaAtualizar, ModelState);
+
+        // CMT: é necessário validar se os dados do patch podem
+        // ser aplicados ao objeto a ser atualizado
+
+        if (!TryValidateModel(filmeParaAtualizar))
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        // CMT: agora é possível alterar na base de dados
+
+        _mapper.Map(filmeParaAtualizar, filme);
+        _context.SaveChanges();
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeletaFilme(int id)
+    {
+        var filme = _context.Filmes.FirstOrDefault(filme => filme.Id == id);
+        if (filme == null) return NotFound();
+
+        _context.Filmes.Remove(filme);
+        _context.SaveChanges();
+
+        return NoContent();
     }
 }
