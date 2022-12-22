@@ -11,6 +11,7 @@ Projeto do curso ".NET 6: criando uma web API" da Alura de criação e gerenciam
 - Consulta com paginação.
 - Uso de base de dados MySql local.
 - Migration com EF.
+- Documentação Swagger adicional.
 
 ## Pacotes instalados
 - Microsoft.EntityFrameworkCore.
@@ -21,9 +22,11 @@ Projeto do curso ".NET 6: criando uma web API" da Alura de criação e gerenciam
 - AutoMapper.Extensions.Microsoft.DependencyInjection.
 
 ## Estrutura
+```
 FilmesAPI
 |-- Controllers
 |-- Data
 |-- Migrations
 |-- Models
 |-- Profiles
+```
