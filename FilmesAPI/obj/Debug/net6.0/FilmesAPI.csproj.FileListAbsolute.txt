@@ -45,3 +45,5 @@ C:\pedro-projetos\dotnet-repo\FilmesAPI\FilmesAPI\bin\Debug\net6.0\Microsoft.Asp
 C:\pedro-projetos\dotnet-repo\FilmesAPI\FilmesAPI\bin\Debug\net6.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 C:\pedro-projetos\dotnet-repo\FilmesAPI\FilmesAPI\bin\Debug\net6.0\Newtonsoft.Json.dll
 C:\pedro-projetos\dotnet-repo\FilmesAPI\FilmesAPI\bin\Debug\net6.0\Newtonsoft.Json.Bson.dll
+C:\pedro-projetos\dotnet-repo\FilmesAPI\FilmesAPI\bin\Debug\net6.0\FilmesAPI.xml
+C:\pedro-projetos\dotnet-repo\FilmesAPI\FilmesAPI\obj\Debug\net6.0\FilmesAPI.xml

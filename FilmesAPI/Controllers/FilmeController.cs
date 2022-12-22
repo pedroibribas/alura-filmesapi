@@ -24,10 +24,23 @@ public class FilmeController : ControllerBase // CMT: extende ControllerBase
     }
 
     // CMT: inicializar lista para guardar dados in-memory
-    //private static List<Filme> filmes = new List<Filme>();
-    //private static int id = 0;
+    // # private static List<Filme> filmes = new List<Filme>();
+    // # private static int id = 0;
 
+    // CMT: é possível melhorar a documentação do Swagger com o código
+    // xml inserido após /// logo acima do método correspondente.
+    // Contudo, para o código xml ser lido, é necessário configurar
+    // o Swagger em Program.cs e adicionar <GenerateDocumentationFile>
+    // como `true` em FilmesAPI.
+
+    /// <summary>
+    /// Adiciona filme ao banco de dados
+    /// </summary>
+    /// <param name="filmeDto">Objeto com os campos exigidos para adicionar filme</param>
+    /// <returns>IActionResult</returns>
+    /// <response code="201">Em caso de sucesso na inserção</response>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)] // <== documentação Swagger
     public IActionResult AdicionaFilme(
         [FromBody] CreateFilmeDto filmeDto
         )
